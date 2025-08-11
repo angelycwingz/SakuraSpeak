@@ -59,3 +59,6 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
         return "Error parsing translation result."
 
     return translated.strip()
+
+from mangum import Mangum
+handler = Mangum(app)
