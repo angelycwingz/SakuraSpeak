@@ -3,7 +3,7 @@ import requests
 
 # API endpoint of your FastAPI backend
 #BACKEND_URL = "http://127.0.0.1:8000/translate/text"
-BACKEND_URL = "https://sakura-speak.vercel.app/"  # https://sakura-speak.vercel.app/ vercel URL if deployed
+BACKEND_URL = "https://sakura-speak.vercel.app/translate/text"  # https://sakura-speak.vercel.app/ vercel URL if deployed
 
 
 st.set_page_config(page_title="🌍 Text Translator", layout="centered")
