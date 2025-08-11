@@ -47,6 +47,7 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
         ]
     }
 
+
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code != 200:
