@@ -24,6 +24,7 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
     """
     Translate text to target language with automatic source language detection.
     """
+    print("function called with", text, target_lang)
 
     model = "sonar-pro"  # Valid Perplexity model
 
@@ -39,7 +40,7 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
                 "role": "system",
                 "content": (
                     f"You are a translation engine. Detect the source language automatically "
-                    f"and translate the user's text into {target_lang}. "
+                    f"and translate ONLY the user's text into {target_lang}. For Example, if the user inputs India in english you will translate it to भारत in Hindi. No explanations or details, for India"
                     f"Return ONLY the translated text without explanations or extra formatting."
                 )
             },
@@ -48,7 +49,8 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
     }
 
 
-    response = requests.post(url, headers=headers, json=payload)
+    response = requests.post(url, json=payload, headers=headers)
+    print("Response:", response.status_code, response.text)
 
     if response.status_code != 200:
         return f"Translation service error: {response.text}"
