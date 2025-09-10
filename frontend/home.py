@@ -2,13 +2,13 @@ import streamlit as st
 import requests
 
 # API endpoint of your FastAPI backend
-#BACKEND_URL = "http://127.0.0.1:8000/translate/text"
-BACKEND_URL = "https://sakura-speak.vercel.app/translate/text"  # https://sakura-speak.vercel.app/ vercel URL if deployed
+BACKEND_URL = "http://127.0.0.1:8000/translate/text"
+#BACKEND_URL = "https://sakura-speak.vercel.app/translate/text"  # https://sakura-speak.vercel.app/ vercel URL if deployed
 
 
-st.set_page_config(page_title="🌍 Text Translator", layout="centered")
+st.set_page_config(page_title="💮 Sakura Speak", layout="centered")
 
-st.title("🌍 Text Translator")
+st.title("💮 Sakura Speak")
 st.write("Translate text with automatic source language detection.")
 
 # Text input
