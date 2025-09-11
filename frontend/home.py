@@ -26,11 +26,11 @@ if st.button("Translate"):
     else:
         try:
             # Send request to backend
-            files = {
-                "text": (None, text_to_translate),
-                "target_lang": (None, target_lang)
+            json = {
+                "text": text_to_translate,
+                "target_lang": target_lang
             }
-            res = requests.post(BACKEND_URL, files=files)
+            res = requests.post(BACKEND_URL, json=json)
 
             if res.status_code == 200:
                 st.success("Translation Complete ✅")

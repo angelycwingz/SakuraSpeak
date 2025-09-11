@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import HTTPException
 import requests
 import os
 from dotenv import load_dotenv
@@ -20,7 +21,7 @@ app.add_middleware(
 )
 
 @app.post("/translate/text")
-async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
+async def translate_text(text: str = Body(...), target_lang: str = Body(...)):
     """
     Translate text to target language with automatic source language detection.
     """
@@ -42,6 +43,7 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
                     f"You are a translation engine. Detect the source language automatically "
                     f"and translate ONLY the user's text into {target_lang}. For Example, if the user inputs India in english you will translate it to भारत in Hindi. No explanations or details, for India"
                     f"Return ONLY the translated text without explanations or extra formatting."
+                    f"If user sends gibberish or non-language text, respond with 'Sorry! I can't translate gibberish.'"
                 )
             },
             {"role": "user", "content": text}
@@ -50,10 +52,9 @@ async def translate_text(text: str = Form(...), target_lang: str = Form(...)):
 
 
     response = requests.post(url, json=payload, headers=headers)
-    print("Response:", response.status_code, response.text)
 
     if response.status_code != 200:
-        return f"Translation service error: {response.text}"
+        raise HTTPException(status_code=response.status_code, detail=f"Error from Perplexity API: {response.text}")
 
     try:
         translated = response.json()["choices"][0]["message"]["content"]
