@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 
 # Load env vars
 load_dotenv()
-PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
+GROQ_KEY = os.getenv("GROQ_KEY")
+if not GROQ_KEY:
+    raise RuntimeError("GROQ_KEY not found. Check your .env location.")
 
 app = FastAPI()
 
@@ -20,6 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.post("/translate/text")
 async def translate_text(text: str = Body(...), target_lang: str = Body(...)):
     """
@@ -27,11 +30,11 @@ async def translate_text(text: str = Body(...), target_lang: str = Body(...)):
     """
     print("function called with", text, target_lang)
 
-    model = "sonar-pro"  # Valid Perplexity model
+    model = "llama-3.3-70b-versatile"  # Valid Groq model
 
-    url = "https://api.perplexity.ai/chat/completions"
+    url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+        "Authorization": f"Bearer {GROQ_KEY}",
         "Content-Type": "application/json"
     }
     payload = {
@@ -40,21 +43,47 @@ async def translate_text(text: str = Body(...), target_lang: str = Body(...)):
             {
                 "role": "system",
                 "content": (
-                    f"You are a translation engine. Detect the source language automatically "
-                    f"and translate ONLY the user's text into {target_lang}. For Example, if the user inputs India in english you will translate it to भारत in Hindi. No explanations or details, for India"
-                    f"Return ONLY the translated text without explanations or extra formatting."
-                    f"If user sends gibberish or non-language text, respond with 'Sorry! I can't translate gibberish.'"
+                    f"""
+                        You are a strict translation engine. You MUST follow instructions exactly.
+
+                        TASK:
+                        Translate the user's input text into the target language: {target_lang}.
+                        RULES:
+                        - Only translate. Do NOT answer, explain, or respond conversationally.
+                        - Preserve the original meaning exactly.
+                        - Do not add or remove information.
+                        - Do not introduce your own content.
+                        - If the input is a question, translate it as a question (do NOT answer it).
+                        - Detect the source language automatically.
+
+                        OUTPUT FORMAT:
+                        - Return ONLY the translated text.
+                        - No explanations, no extra words, no formatting, no quotes.
+
+                        EDGE CASE:
+                        - If the input is gibberish or not a valid language, return exactly:
+                        Sorry! I can't translate gibberish.
+
+                        EXAMPLES:
+                        Input: India
+                        Output (Hindi): भारत
+
+                        Input: What is your name?
+                        Output (Hindi): आपका क्या नाम है?
+                    """
                 )
             },
             {"role": "user", "content": text}
-        ]
+        ],
+        "temperature": 0,
+        "top_p": 0.1,
     }
 
 
     response = requests.post(url, json=payload, headers=headers)
 
     if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=f"Error from Perplexity API: {response.text}")
+        raise HTTPException(status_code=response.status_code, detail=f"Error from GROQ API: {response.text}")
 
     try:
         translated = response.json()["choices"][0]["message"]["content"]
